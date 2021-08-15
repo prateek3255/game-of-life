@@ -3,15 +3,18 @@ import debounce from "lodash/debounce";
 
 const getCellSize = () => typeof window !== "undefined" && window.innerWidth >= 1000 ? 24 : 20;
 
-const Cell = ({ alive }: {alive: boolean}) => {
+const Cell = React.memo(({ alive, handleClick, row, col }: { alive: boolean, handleClick: (row: number, col: number) => void, row: number, col: number }) => {
+  const onClick = () => {
+    handleClick(row, col);
+  }
   return (
-    <div role="button" style={{ height: getCellSize(), width: getCellSize() }} className={`border-[1px] border-black ${alive ? 'bg-black' : 'bg-white'}`} />
+    <div role="button" onClick={onClick} style={{ height: getCellSize(), width: getCellSize() }} className={`border-[1px] border-gray-300 ${alive ? 'bg-black' : 'bg-white'}`} />
   )
-}
+});
 
 type CellState = boolean[][];
 
-type Action = { type: 'initialize'};
+type Action = { type: 'initialize'} | { type: 'cell_clicked', row: number, col: number };
 
 function reducer(state: CellState, action: Action): CellState {
   switch (action.type) {
@@ -19,6 +22,14 @@ function reducer(state: CellState, action: Action): CellState {
       const columns = Math.floor((window.innerHeight - 200) / getCellSize());
       const rows = Math.floor(window.innerWidth / getCellSize());
       return new Array(columns).fill(false).map(i => new Array(rows).fill(false));
+    case 'cell_clicked':
+      const newCellState = !state[action.row][action.col];
+      const updatedState = [
+        ...state.slice(0, action.row),
+        [...state[action.row].slice(0, action.col), newCellState, ...state[action.row].slice(action.col + 1)],
+        ...state.slice(action.row + 1)
+      ]
+      return updatedState;
     default:
     return state;
   }
@@ -43,6 +54,10 @@ export default function Home() {
     }
   }, []);
 
+  const handleCellClick = React.useCallback((row: number, col: number) => {
+    dispatch({ type: 'cell_clicked', row, col });
+  },[])
+
   if (!isMounted) {
     return <div>Loading...</div>
   }
@@ -56,7 +71,7 @@ export default function Home() {
         {cells.map((row, i) => (
           <div key={i} className="flex flex-row">
             {row.map((cell, j) => (
-              <Cell key={`${i}-${j}`} alive={cell} />
+              <Cell key={`${i}-${j}`} row={i} col={j} alive={cell} handleClick={handleCellClick} />
             ))}
           </div>
         ))}
