@@ -1,7 +1,7 @@
 import React from "react";
 import debounce from "lodash/debounce";
 
-const getCellSize = () => typeof window !== "undefined" && window.innerWidth >= 1000 ? 24 : 20;
+const getCellSize = () => typeof window !== "undefined" && window.innerWidth >= 500 ? 24 : 20;
 
 const Cell = React.memo(({ alive, handleClick, row, col }: { alive: boolean, handleClick: (row: number, col: number) => void, row: number, col: number }) => {
   const onClick = () => {
@@ -12,18 +12,18 @@ const Cell = React.memo(({ alive, handleClick, row, col }: { alive: boolean, han
   )
 });
 
-type CellState = boolean[][];
+type CellState = number[][];
 
 type Action = { type: 'initialize'} | { type: 'cell_clicked', row: number, col: number };
 
 function reducer(state: CellState, action: Action): CellState {
   switch (action.type) {
     case 'initialize':
-      const columns = Math.floor((window.innerHeight - 200) / getCellSize());
-      const rows = Math.floor(window.innerWidth / getCellSize());
-      return new Array(columns).fill(false).map(i => new Array(rows).fill(false));
+      const columns = Math.floor(Math.min((window.innerHeight - 200), 1200) / getCellSize());
+      const rows = Math.floor(Math.min(window.innerWidth, 1200) / getCellSize());
+      return new Array(columns).fill(false).map(i => new Array(rows).fill(0));
     case 'cell_clicked':
-      const newCellState = !state[action.row][action.col];
+      const newCellState = state[action.row][action.col] === 0 ? 1 : 0;
       const updatedState = [
         ...state.slice(0, action.row),
         [...state[action.row].slice(0, action.col), newCellState, ...state[action.row].slice(action.col + 1)],
@@ -71,7 +71,7 @@ export default function Home() {
         {cells.map((row, i) => (
           <div key={i} className="flex flex-row">
             {row.map((cell, j) => (
-              <Cell key={`${i}-${j}`} row={i} col={j} alive={cell} handleClick={handleCellClick} />
+              <Cell key={`${i}-${j}`} row={i} col={j} alive={cell === 1} handleClick={handleCellClick} />
             ))}
           </div>
         ))}
