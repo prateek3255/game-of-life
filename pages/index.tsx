@@ -8,20 +8,58 @@ const Cell = React.memo(({ alive, handleClick, row, col }: { alive: boolean, han
     handleClick(row, col);
   }
   return (
-    <div role="button" onClick={onClick} style={{ height: getCellSize(), width: getCellSize() }} className={`border-[1px] border-gray-300 ${alive ? 'bg-black' : 'bg-white'}`} />
+    <button onClick={onClick} style={{ height: getCellSize(), width: getCellSize() }} className={`border-[1px] border-gray-300 ${alive ? 'bg-black' : 'bg-white'}`} />
   )
 });
 
 type CellState = number[][];
 
-type Action = { type: 'initialize'} | { type: 'cell_clicked', row: number, col: number };
+type Action = | { type: 'initialize', random?: boolean } 
+              | { type: 'cell_clicked', row: number, col: number } 
+              | { type: 'generate_next_state' };
+
+function generateBoard(random?: boolean): CellState {
+  const rows = Math.floor(Math.min((window.innerHeight - 200), 1200) / getCellSize());
+  const columns = Math.floor(Math.min(window.innerWidth, 1200) / getCellSize());
+  const state = new Array(rows).fill(0).map(i => new Array(columns).fill(0));
+
+  if (random) {
+    // Create a random board where each cell has
+    // a 30% chance of being alive
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < columns; col++) {
+        state[row][col] = Math.random() < 0.7 ? 0 : 1;
+      }
+    }
+  }
+
+  return state;
+}
+
+function getAliveNeighbours(state: CellState, x: number, y: number, rows: number, cols: number): number {
+  let sum = 0;
+  for(let i = -1; i < 2; i++) {
+    for(let j = -1; j < 2; j++) {
+      // Use the modulus operator to handles the 
+      // edge cases where cells are on the  edge 
+      // of the board, it will wrap the cell around 
+      // the board. Inspired by the coding train's solution
+      // https://www.youtube.com/watch?v=FWSR_7kZuYg
+      const xPos = (x + i + rows) % rows;
+      const yPos = (y + j + cols) % cols;
+      sum += state[xPos][yPos];
+    }
+  }
+
+  sum = sum - state[x][y];
+
+  return sum;
+}
 
 function reducer(state: CellState, action: Action): CellState {
   switch (action.type) {
     case 'initialize':
-      const columns = Math.floor(Math.min((window.innerHeight - 200), 1200) / getCellSize());
-      const rows = Math.floor(Math.min(window.innerWidth, 1200) / getCellSize());
-      return new Array(columns).fill(false).map(i => new Array(rows).fill(0));
+      return generateBoard(action.random);
     case 'cell_clicked':
       const newCellState = state[action.row][action.col] === 0 ? 1 : 0;
       const updatedState = [
@@ -30,6 +68,28 @@ function reducer(state: CellState, action: Action): CellState {
         ...state.slice(action.row + 1)
       ]
       return updatedState;
+    case 'generate_next_state':
+      const nextState = generateBoard();
+      const totalRows = state.length;
+      const totalCols = state[0].length;
+      // Using for loop here for simplicity and readability
+      // can change later if a more readable way is found
+      for(let i = 0; i < totalRows; i++) {
+        for(let j = 0; j < totalCols; j++) {
+          const cellState = state[i][j];
+          const aliveNeighbours = getAliveNeighbours(state, i, j, totalRows, totalCols);
+
+          if(cellState === 0 && aliveNeighbours === 3) {
+            nextState[i][j] = 1;
+          } else if(cellState === 1 && (aliveNeighbours < 2 || aliveNeighbours > 3)) {
+            nextState[i][j] = 0;
+          } else {
+            nextState[i][j] = cellState;
+          } 
+
+        }
+      }
+      return nextState;
     default:
     return state;
   }
@@ -40,6 +100,7 @@ export default function Home() {
 
   const [cells, dispatch] = React.useReducer(reducer, []);
   const [isMounted, setIsMounted] = React.useState(false);
+  const intervalRef = React.useRef<NodeJS.Timeout | undefined>();
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -58,6 +119,19 @@ export default function Home() {
     dispatch({ type: 'cell_clicked', row, col });
   },[])
 
+  const play = () => {
+    intervalRef.current = setInterval(() => {
+      dispatch({ type: 'generate_next_state' });
+    }, 100)
+  }
+
+  const reset = (random = false) => {
+    dispatch({ type: 'initialize', random });
+    if (intervalRef.current !== undefined) {
+      clearInterval(intervalRef.current);
+    }
+  }
+
   if (!isMounted) {
     return <div>Loading...</div>
   }
@@ -75,6 +149,11 @@ export default function Home() {
             ))}
           </div>
         ))}
+      </div>
+      <div className="flex">
+        <button onClick={play}>Start</button>
+        <button onClick={() => reset()}>Reset</button>
+        <button onClick={() => reset(true)}>Random</button>
       </div>
     </div>  
   )
