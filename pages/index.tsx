@@ -1,20 +1,24 @@
 import React from "react";
+import debounce from "lodash/debounce";
 
+const getCellSize = () => typeof window !== "undefined" && window.innerWidth >= 1000 ? 24 : 20;
 
 const Cell = ({ alive }: {alive: boolean}) => {
   return (
-    <div role="button" className={`h-8 w-8 border-[1px] border-black ${alive ? 'bg-black' : 'bg-white'}`} />
+    <div role="button" style={{ height: getCellSize(), width: getCellSize() }} className={`border-[1px] border-black ${alive ? 'bg-black' : 'bg-white'}`} />
   )
 }
 
 type CellState = boolean[][];
 
-type Action = { type: 'initialize', rows: number; columns: number };
+type Action = { type: 'initialize'};
 
 function reducer(state: CellState, action: Action): CellState {
   switch (action.type) {
     case 'initialize':
-      return new Array(action.columns).fill(false).map(i => new Array(action.rows).fill(false));
+      const columns = Math.floor((window.innerHeight - 200) / getCellSize());
+      const rows = Math.floor(window.innerWidth / getCellSize());
+      return new Array(columns).fill(false).map(i => new Array(rows).fill(false));
     default:
     return state;
   }
@@ -27,12 +31,16 @@ export default function Home() {
   const [isMounted, setIsMounted] = React.useState(false);
 
   React.useEffect(() => {
+    const handleResize = () => {
+      dispatch({ type: 'initialize' });
+    }
     setIsMounted(true);
+    handleResize();
+    window.addEventListener('resize', debounce(handleResize, 200));
 
-    const columns = Math.floor((window.innerHeight - 200) / 32);
-    const rows = Math.floor(window.innerWidth / 32);
-    dispatch({ type: 'initialize', rows, columns });
-
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    }
   }, []);
 
   if (!isMounted) {
