@@ -138,7 +138,14 @@ function reducer(state: CellState, action: Action): CellState {
 export default function Home() {
   const [cells, dispatch] = React.useReducer(reducer, []);
   const [isMounted, setIsMounted] = React.useState(false);
+  const [isPlaying, setIsPlaying] = React.useState(false);
   const intervalRef = React.useRef<NodeJS.Timeout | undefined>();
+
+  const clearCurrentInterval = React.useCallback(() => {
+    if (intervalRef.current !== undefined) {
+      clearInterval(intervalRef.current);
+    }
+  }, []);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -149,28 +156,35 @@ export default function Home() {
     window.addEventListener("resize", debounce(handleResize, 200));
 
     return () => {
-      if (intervalRef.current !== undefined) {
-        clearInterval(intervalRef.current);
-      }
+      clearCurrentInterval();
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [clearCurrentInterval]);
 
   const handleCellClick = React.useCallback((row: number, col: number) => {
     dispatch({ type: "cell_clicked", row, col });
   }, []);
 
-  const play = () => {
-    intervalRef.current = setInterval(() => {
-      dispatch({ type: "generate_next_state" });
-    }, 100);
-  };
+  const playOrPause = React.useCallback(() => {
+    if (isPlaying) {
+      setIsPlaying(false);
+      clearCurrentInterval();
+    } else {
+      setIsPlaying(true);
+      clearCurrentInterval();
+      intervalRef.current = setInterval(() => {
+        dispatch({ type: "generate_next_state" });
+      }, 100);
+    }
+  }, [isPlaying, clearCurrentInterval]);
+
+  const generateNextFrame = React.useCallback(() => {
+    dispatch({ type: "generate_next_state" });
+  }, []);
 
   const reset = (random = false) => {
     dispatch({ type: "initialize", random });
-    if (intervalRef.current !== undefined) {
-      clearInterval(intervalRef.current);
-    }
+    clearCurrentInterval();
   };
 
   return (
@@ -195,11 +209,52 @@ export default function Home() {
           </div>
         ))}
       </div>
-      <div className="flex h-full">
-        <button onClick={play}>Start</button>
+      <div className="flex h-full w-full justify-evenly">
+        <PlayButton
+          isPlaying={isPlaying}
+          playOrPause={playOrPause}
+          generateNextFrame={generateNextFrame}
+          isManual={false}
+        />
         <button onClick={() => reset()}>Reset</button>
         <button onClick={() => reset(true)}>Random</button>
       </div>
     </div>
   );
 }
+
+const PlayButton = React.memo(
+  ({
+    isPlaying,
+    playOrPause,
+    isManual,
+    generateNextFrame,
+  }: {
+    isPlaying: boolean;
+    isManual: boolean;
+    playOrPause: () => void;
+    generateNextFrame: () => void;
+  }) => {
+    const handleClick = () => {
+      if (isManual) {
+        generateNextFrame();
+      } else {
+        playOrPause();
+      }
+    };
+
+    const getButtonText = () => {
+      if (isManual) {
+        return "Next";
+      }
+
+      if (isPlaying) {
+        return "Pause";
+      } else {
+        return "Play";
+      }
+    };
+
+    return <button onClick={handleClick}>{getButtonText()}</button>;
+  }
+);
