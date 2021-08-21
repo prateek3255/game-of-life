@@ -149,6 +149,7 @@ export default function Home() {
   const [isMounted, setIsMounted] = React.useState(false);
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [isManual, setIsManual] = React.useState(false);
+  const [regenerationInterval, setRegenerationInterval] = React.useState(100);
   const intervalRef = React.useRef<NodeJS.Timeout | undefined>();
 
   const clearCurrentInterval = React.useCallback(() => {
@@ -182,11 +183,9 @@ export default function Home() {
     } else {
       setIsPlaying(true);
       clearCurrentInterval();
-      intervalRef.current = setInterval(() => {
-        dispatch({ type: "generate_next_state" });
-      }, 100);
+      intervalRef.current = setInterval(generateNextFrame, regenerationInterval);
     }
-  }, [isPlaying, clearCurrentInterval]);
+  }, [isPlaying, regenerationInterval, clearCurrentInterval]);
 
   const generateNextFrame = React.useCallback(() => {
     dispatch({ type: "generate_next_state" });
@@ -202,6 +201,15 @@ export default function Home() {
     clearCurrentInterval();
     setIsPlaying(false);
   };
+
+  const handleRegenerationIntervalChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newInterval = parseInt(event.target.value, 10);
+    setRegenerationInterval(newInterval);
+    if(isPlaying) {
+      clearCurrentInterval();
+      intervalRef.current = setInterval(generateNextFrame, newInterval);
+    }
+  }
 
   return (
     <div className="h-screen w-full flex flex-col justify-center items-center bg-blue-100">
@@ -244,6 +252,12 @@ export default function Home() {
           />
           <label htmlFor="isManual"> Manual</label>
         </span>
+        <select value={regenerationInterval} onChange={handleRegenerationIntervalChange}>
+          <option value={66}>15 gps</option>
+          <option value={100}>10 gps</option>
+          <option value={200}>5 gps</option>
+          <option value={1000}>1 gps</option>
+        </select>
       </div>
     </div>
   );
