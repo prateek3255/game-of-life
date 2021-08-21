@@ -31,7 +31,7 @@ const Cell = React.memo(
   }
 );
 
-type CellState = number[][];
+type CellState = { cells: number[][]; count: number };
 
 type Action =
   | { type: "initialize"; random?: boolean }
@@ -55,11 +55,11 @@ function generateBoard(random?: boolean): CellState {
     }
   }
 
-  return state;
+  return { cells: state, count: 0 };
 }
 
 function getAliveNeighbours(
-  state: CellState,
+  state: CellState["cells"],
   x: number,
   y: number,
   rows: number,
@@ -88,29 +88,32 @@ function reducer(state: CellState, action: Action): CellState {
   switch (action.type) {
     case "initialize":
       return generateBoard(action.random);
-    case "cell_clicked":
-      const newCellState = state[action.row][action.col] === 0 ? 1 : 0;
+    case "cell_clicked": {
+      const { cells } = state;
+      const newCellState = cells[action.row][action.col] === 0 ? 1 : 0;
       const updatedState = [
-        ...state.slice(0, action.row),
+        ...cells.slice(0, action.row),
         [
-          ...state[action.row].slice(0, action.col),
+          ...cells[action.row].slice(0, action.col),
           newCellState,
-          ...state[action.row].slice(action.col + 1),
+          ...cells[action.row].slice(action.col + 1),
         ],
-        ...state.slice(action.row + 1),
+        ...cells.slice(action.row + 1),
       ];
-      return updatedState;
-    case "generate_next_state":
+      return { ...state, cells: updatedState };
+    }
+    case "generate_next_state": {
       const nextState = generateBoard();
-      const totalRows = state.length;
-      const totalCols = state[0].length;
+      const { cells, count } = state;
+      const totalRows = cells.length;
+      const totalCols = cells[0].length;
       // Using for loop here for simplicity and readability
       // can change later if a more readable way is found
       for (let i = 0; i < totalRows; i++) {
         for (let j = 0; j < totalCols; j++) {
-          const cellState = state[i][j];
+          const cellState = cells[i][j];
           const aliveNeighbours = getAliveNeighbours(
-            state,
+            cells,
             i,
             j,
             totalRows,
@@ -118,27 +121,34 @@ function reducer(state: CellState, action: Action): CellState {
           );
 
           if (cellState === 0 && aliveNeighbours === 3) {
-            nextState[i][j] = 1;
+            nextState.cells[i][j] = 1;
           } else if (
             cellState === 1 &&
             (aliveNeighbours < 2 || aliveNeighbours > 3)
           ) {
-            nextState[i][j] = 0;
+            nextState.cells[i][j] = 0;
           } else {
-            nextState[i][j] = cellState;
+            nextState.cells[i][j] = cellState;
           }
         }
       }
+
+      nextState.count = count + 1;
       return nextState;
+    }
     default:
       return state;
   }
 }
 
 export default function Home() {
-  const [cells, dispatch] = React.useReducer(reducer, []);
+  const [{ cells, count }, dispatch] = React.useReducer(reducer, {
+    cells: [],
+    count: 0,
+  });
   const [isMounted, setIsMounted] = React.useState(false);
   const [isPlaying, setIsPlaying] = React.useState(false);
+  const [isManual, setIsManual] = React.useState(false);
   const intervalRef = React.useRef<NodeJS.Timeout | undefined>();
 
   const clearCurrentInterval = React.useCallback(() => {
@@ -187,6 +197,12 @@ export default function Home() {
     clearCurrentInterval();
   };
 
+  const handleManualToggle = () => {
+    setIsManual(!isManual);
+    clearCurrentInterval();
+    setIsPlaying(false);
+  };
+
   return (
     <div className="h-screen w-full flex flex-col justify-center items-center bg-blue-100">
       <div className="min-h-[80px] sm:min-h-[100px] text-center flex items-center">
@@ -210,14 +226,24 @@ export default function Home() {
         ))}
       </div>
       <div className="flex h-full w-full justify-evenly">
+        <div>{count}</div>
         <PlayButton
           isPlaying={isPlaying}
           playOrPause={playOrPause}
           generateNextFrame={generateNextFrame}
-          isManual={false}
+          isManual={isManual}
         />
         <button onClick={() => reset()}>Reset</button>
         <button onClick={() => reset(true)}>Random</button>
+        <span>
+          <input
+            type="checkbox"
+            checked={isManual}
+            id="isManual"
+            onChange={handleManualToggle}
+          />
+          <label htmlFor="isManual"> Manual</label>
+        </span>
       </div>
     </div>
   );
