@@ -240,10 +240,10 @@ export default function Home() {
           </div>
         ))}
       </div>
-      <div className="flex w-full max-w-[1200px] mt-8 items-center justify-center flex-wrap gap-5">
-        <div className="flex flex-col">
-          Generations
-          <div className="bg-blue-50 p-3 rounded-lg w-28 h-10 flex items-center mt-1">
+      <div className="flex w-full max-w-[1200px] mt-8 items-center justify-center flex-wrap gap-5 sm:gap-10">
+        <div className="flex flex-col relative">
+          <span className="text-base absolute top-[-22px] left-[2px] font-semibold">Frame</span>
+          <div className="bg-blue-50 p-3 rounded-lg w-28 h-8 flex items-center mt-1">
             {count}
           </div>
         </div>
@@ -253,10 +253,10 @@ export default function Home() {
           generateNextFrame={generateNextFrame}
           isManual={isManual}
         />
-        <Button size="small" rounded onClick={() => reset()}>
+        <Button aria-label="Reset" size="small" rounded onClick={() => reset()}>
           <Reset additonalStyles="h-5 w-5" />{" "}
         </Button>
-        <Button size="small" rounded onClick={() => reset(true)}>
+        <Button aria-label="Random" size="small" rounded onClick={() => reset(true)}>
           <Dice additonalStyles="h-5 w-5" />
         </Button>
         <div>
@@ -269,6 +269,7 @@ export default function Home() {
         </div>
         
           <select
+            aria-label="Frames per second"
             value={regenerationInterval}
             onChange={handleRegenerationIntervalChange}
             className=" p-2 rounded-lg appearance-none"
@@ -307,19 +308,21 @@ const PlayButton = React.memo(
 
     const getButtonIcon = () => {
       if (isManual) {
-        return <Next />;
+        return { icon: <Next />, text: "Next frame" };
       }
 
       if (isPlaying) {
-        return <Pause />;
+        return { icon: <Pause />, text: "Pause" };
       } else {
-        return <Play />;
+        return { icon: <Play additonalStyles="ml-[2px] mr-[-2px]" />, text: "Play" };
       }
     };
 
+    const { icon, text } = getButtonIcon();
+
     return (
-      <Button rounded onClick={handleClick}>
-        {getButtonIcon()}
+      <Button aria-label={text} rounded onClick={handleClick}>
+        {icon}
       </Button>
     );
   }
