@@ -7,7 +7,7 @@ const Play = ({ additonalStyles = "" }: { additonalStyles?: string}) => (
     fill="#ffffff"
     stroke="#ffffff"
     strokeWidth="2"
-    stroke-linecap="round"
+    strokeLinecap="round"
     strokeLinejoin="round"
     className={`feather feather-play ${additonalStyles}`}
   >

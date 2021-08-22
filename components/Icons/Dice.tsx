@@ -16,7 +16,7 @@ const Dice = ({ additonalStyles = "" }: { additonalStyles?: string }) => (
       rx="24"
       strokeWidth="32"
       stroke="#ffffff"
-      stroke-linecap="round"
+      strokeLinecap="round"
       strokeLinejoin="round"
       fill="none"
     ></rect>

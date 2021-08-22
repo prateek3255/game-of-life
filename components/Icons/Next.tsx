@@ -7,7 +7,7 @@ const Next = ({ additonalStyles = "" }: { additonalStyles?: string }) => (
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
-    stroke-linecap="round"
+    strokeLinecap="round"
     strokeLinejoin="round"
     className={`feather feather-skip-forward ${additonalStyles}`}
   >

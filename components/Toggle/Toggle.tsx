@@ -13,9 +13,10 @@ const Toggle = ({
 }) => {
   return (
     <div className="flex justify-center items-center">
-      <span className="text-base font-medium">{leftText}</span>
+      <span className="text-base font-bold">{leftText}</span>
       <div
-        role="button"
+        role="checkbox"
+        aria-checked={active}
         className={`w-14 h-7 flex items-center rounded-full mx-3 px-1 ${
           active ? "bg-blue-500" : "bg-gray-300"
         }`}
@@ -27,7 +28,7 @@ const Toggle = ({
           }`}
         ></div>
       </div>
-      <span className="text-base font-medium">{rightText}</span>
+      <span className="text-base font-bold">{rightText}</span>
     </div>
   );
 };

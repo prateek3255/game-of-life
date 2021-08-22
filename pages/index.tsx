@@ -219,7 +219,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center bg-gradient-to-b from-blue-50 to-blue-200">
+    <div className="min-h-screen w-full flex flex-col items-center bg-gradient-to-b from-blue-50 to-blue-200 font-sans">
       <div className="min-h-[80px] sm:min-h-[100px] text-center flex items-center">
         <h1 className="font-sans font-black text-4xl sm:text-5xl text-blue-500">
           Game of Life
@@ -267,18 +267,19 @@ export default function Home() {
             handleToggleClick={handleManualToggle}
           />
         </div>
-        {!isManual && (
+        
           <select
             value={regenerationInterval}
             onChange={handleRegenerationIntervalChange}
             className=" p-2 rounded-lg appearance-none"
+            disabled={isManual}
           >
             <option value={66}>15 fps</option>
             <option value={100}>10 fps</option>
             <option value={200}>5 fps</option>
             <option value={1000}>1 fps</option>
           </select>
-        )}
+        
       </div>
     </div>
   );
@@ -312,7 +313,7 @@ const PlayButton = React.memo(
       if (isPlaying) {
         return <Pause />;
       } else {
-        return <Play additonalStyles="ml-[2px]" />;
+        return <Play />;
       }
     };
 
