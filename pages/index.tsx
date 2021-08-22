@@ -1,5 +1,8 @@
 import React from "react";
 import debounce from "lodash/debounce";
+import { Play, Pause, Next, Reset, Dice } from "@components/Icons";
+import { Button } from "@components/Button";
+import { Toggle } from "@components/Toggle";
 
 const getCellSize = () =>
   typeof window !== "undefined" && window.innerWidth >= 500 ? 24 : 20;
@@ -40,7 +43,7 @@ type Action =
 
 function generateBoard(random?: boolean): CellState {
   const rows = Math.floor(
-    Math.min(window.innerHeight - 200, 1200) / getCellSize()
+    Math.min(window.innerHeight - 250, 1200) / getCellSize()
   );
   const columns = Math.floor(Math.min(window.innerWidth, 1200) / getCellSize());
   const state = new Array(rows).fill(0).map((i) => new Array(columns).fill(0));
@@ -183,7 +186,10 @@ export default function Home() {
     } else {
       setIsPlaying(true);
       clearCurrentInterval();
-      intervalRef.current = setInterval(generateNextFrame, regenerationInterval);
+      intervalRef.current = setInterval(
+        generateNextFrame,
+        regenerationInterval
+      );
     }
   }, [isPlaying, regenerationInterval, clearCurrentInterval]);
 
@@ -202,17 +208,19 @@ export default function Home() {
     setIsPlaying(false);
   };
 
-  const handleRegenerationIntervalChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleRegenerationIntervalChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const newInterval = parseInt(event.target.value, 10);
     setRegenerationInterval(newInterval);
-    if(isPlaying) {
+    if (isPlaying) {
       clearCurrentInterval();
       intervalRef.current = setInterval(generateNextFrame, newInterval);
     }
-  }
+  };
 
   return (
-    <div className="h-screen w-full flex flex-col justify-center items-center bg-blue-100">
+    <div className="min-h-screen w-full flex flex-col items-center bg-gradient-to-b from-blue-50 to-blue-200">
       <div className="min-h-[80px] sm:min-h-[100px] text-center flex items-center">
         <h1 className="font-sans font-black text-4xl sm:text-5xl text-blue-500">
           Game of Life
@@ -233,31 +241,45 @@ export default function Home() {
           </div>
         ))}
       </div>
-      <div className="flex h-full w-full justify-evenly">
-        <div>{count}</div>
+      <div className="flex w-full max-w-[1200px] mt-8 items-center justify-center flex-wrap gap-5">
+        <div className="flex flex-col">
+          Generations
+          <div className="bg-blue-50 p-3 rounded-lg w-28 h-10 flex items-center mt-1">
+            {count}
+          </div>
+        </div>
         <PlayButton
           isPlaying={isPlaying}
           playOrPause={playOrPause}
           generateNextFrame={generateNextFrame}
           isManual={isManual}
         />
-        <button onClick={() => reset()}>Reset</button>
-        <button onClick={() => reset(true)}>Random</button>
-        <span>
-          <input
-            type="checkbox"
-            checked={isManual}
-            id="isManual"
-            onChange={handleManualToggle}
+        <Button size="small" rounded onClick={() => reset()}>
+          <Reset additonalStyles="h-5 w-5" />{" "}
+        </Button>
+        <Button size="small" rounded onClick={() => reset(true)}>
+          <Dice additonalStyles="h-5 w-5" />
+        </Button>
+        <div>
+          <Toggle
+            active={!isManual}
+            leftText="Manual"
+            rightText="Automatic"
+            handleToggleClick={handleManualToggle}
           />
-          <label htmlFor="isManual"> Manual</label>
-        </span>
-        <select value={regenerationInterval} onChange={handleRegenerationIntervalChange}>
-          <option value={66}>15 gps</option>
-          <option value={100}>10 gps</option>
-          <option value={200}>5 gps</option>
-          <option value={1000}>1 gps</option>
-        </select>
+        </div>
+        {!isManual && (
+          <select
+            value={regenerationInterval}
+            onChange={handleRegenerationIntervalChange}
+            className=" p-2 rounded-lg appearance-none"
+          >
+            <option value={66}>15 fps</option>
+            <option value={100}>10 fps</option>
+            <option value={200}>5 fps</option>
+            <option value={1000}>1 fps</option>
+          </select>
+        )}
       </div>
     </div>
   );
@@ -283,18 +305,22 @@ const PlayButton = React.memo(
       }
     };
 
-    const getButtonText = () => {
+    const getButtonIcon = () => {
       if (isManual) {
-        return "Next";
+        return <Next />;
       }
 
       if (isPlaying) {
-        return "Pause";
+        return <Pause />;
       } else {
-        return "Play";
+        return <Play additonalStyles="ml-[2px]" />;
       }
     };
 
-    return <button onClick={handleClick}>{getButtonText()}</button>;
+    return (
+      <Button rounded onClick={handleClick}>
+        {getButtonIcon()}
+      </Button>
+    );
   }
 );
