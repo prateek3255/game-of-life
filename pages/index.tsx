@@ -156,6 +156,7 @@ export default function Home() {
   const intervalRef = React.useRef<NodeJS.Timeout | undefined>();
 
   const clearCurrentInterval = React.useCallback(() => {
+    setIsPlaying(false);
     if (intervalRef.current !== undefined) {
       clearInterval(intervalRef.current);
     }
@@ -181,11 +182,10 @@ export default function Home() {
 
   const playOrPause = React.useCallback(() => {
     if (isPlaying) {
-      setIsPlaying(false);
+
       clearCurrentInterval();
     } else {
       setIsPlaying(true);
-      clearCurrentInterval();
       intervalRef.current = setInterval(
         generateNextFrame,
         regenerationInterval
@@ -205,7 +205,6 @@ export default function Home() {
   const handleManualToggle = () => {
     setIsManual(!isManual);
     clearCurrentInterval();
-    setIsPlaying(false);
   };
 
   const handleRegenerationIntervalChange = (
