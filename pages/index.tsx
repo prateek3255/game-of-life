@@ -144,6 +144,10 @@ function reducer(state: CellState, action: Action): CellState {
   }
 }
 
+const areAllCellsDead = (cells: CellState["cells"]): boolean => {
+  return cells.every((row) => row.every((cell) => cell === 0));
+};
+
 export default function Home() {
   const [{ cells, count }, dispatch] = React.useReducer(reducer, {
     cells: [],
@@ -164,6 +168,7 @@ export default function Home() {
 
   React.useEffect(() => {
     const handleResize = () => {
+      clearCurrentInterval();
       dispatch({ type: "initialize" });
     };
     setIsMounted(true);
@@ -180,43 +185,48 @@ export default function Home() {
     dispatch({ type: "cell_clicked", row, col });
   }, []);
 
-  const playOrPause = React.useCallback(() => {
+  const playOrPause = () => {
     if (isPlaying) {
-
       clearCurrentInterval();
-    } else {
-      setIsPlaying(true);
-      intervalRef.current = setInterval(
-        generateNextFrame,
-        regenerationInterval
-      );
+      return;
     }
-  }, [isPlaying, regenerationInterval, clearCurrentInterval]);
+    if (areAllCellsDead(cells)) {
+      alert(
+        "There are no alive cells on board right now. You can either click on cells on the board to make them alive or use the random generator button to randomly make some of the cells alive. You can also click on the info icon to learn more about how this works."
+      );
+      return;
+    }
+    setIsPlaying(true);
+    intervalRef.current = setInterval(generateNextFrame, regenerationInterval);
+  };
 
   const generateNextFrame = React.useCallback(() => {
     dispatch({ type: "generate_next_state" });
   }, []);
 
-  const reset = (random = false) => {
-    dispatch({ type: "initialize", random });
-    clearCurrentInterval();
-  };
-
-  const handleManualToggle = () => {
-    setIsManual(!isManual);
-    clearCurrentInterval();
-  };
-
-  const handleRegenerationIntervalChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const newInterval = parseInt(event.target.value, 10);
-    setRegenerationInterval(newInterval);
-    if (isPlaying) {
+  const reset = React.useCallback(
+    (random = false) => {
+      dispatch({ type: "initialize", random });
       clearCurrentInterval();
-      intervalRef.current = setInterval(generateNextFrame, newInterval);
-    }
-  };
+    },
+    [clearCurrentInterval]
+  );
+
+  const handleManualToggle = React.useCallback(() => {
+    setIsManual((prevIsManual) => !prevIsManual);
+    clearCurrentInterval();
+  }, [clearCurrentInterval]);
+
+  const handleRegenerationIntervalChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      const newInterval = parseInt(event.target.value, 10);
+      setRegenerationInterval(newInterval);
+      if (isPlaying) {
+        clearCurrentInterval();
+      }
+    },
+    [isPlaying, generateNextFrame, clearCurrentInterval]
+  );
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center bg-gradient-to-b from-blue-50 to-blue-200 font-sans">
@@ -242,7 +252,9 @@ export default function Home() {
       </div>
       <div className="flex w-full max-w-[1200px] mt-8 items-center justify-center flex-wrap gap-5 sm:gap-10">
         <div className="flex flex-col relative">
-          <span className="text-base absolute top-[-22px] left-[2px] font-semibold">Frame</span>
+          <span className="text-base absolute top-[-22px] left-[2px] font-semibold">
+            Generation
+          </span>
           <div className="bg-blue-50 p-3 rounded-lg w-28 h-8 flex items-center mt-1">
             {count}
           </div>
@@ -253,10 +265,88 @@ export default function Home() {
           generateNextFrame={generateNextFrame}
           isManual={isManual}
         />
+        <OtherControls
+          isManual={isManual}
+          handleManualToggle={handleManualToggle}
+          handleRegenerationIntervalChange={handleRegenerationIntervalChange}
+          regenerationInterval={regenerationInterval}
+          reset={reset}
+        />
+      </div>
+    </div>
+  );
+}
+
+const PlayButton = ({
+  isPlaying,
+  playOrPause,
+  isManual,
+  generateNextFrame,
+}: {
+  isPlaying: boolean;
+  isManual: boolean;
+  playOrPause: () => void;
+  generateNextFrame: () => void;
+}) => {
+  const handleClick = () => {
+    if (isManual) {
+      generateNextFrame();
+    } else {
+      playOrPause();
+    }
+  };
+
+  const getButtonIcon = () => {
+    if (isManual) {
+      return { icon: <Next />, text: "Next frame" };
+    }
+
+    if (isPlaying) {
+      return { icon: <Pause />, text: "Pause" };
+    } else {
+      return {
+        icon: <Play additonalStyles="ml-[2px] mr-[-2px]" />,
+        text: "Play",
+      };
+    }
+  };
+
+  const { icon, text } = getButtonIcon();
+
+  return (
+    <Button aria-label={text} rounded onClick={handleClick}>
+      {icon}
+    </Button>
+  );
+};
+
+const OtherControls = React.memo(
+  ({
+    isManual,
+    handleManualToggle,
+    handleRegenerationIntervalChange,
+    regenerationInterval,
+    reset,
+  }: {
+    isManual: boolean;
+    handleManualToggle: () => void;
+    handleRegenerationIntervalChange: (
+      event: React.ChangeEvent<HTMLSelectElement>
+    ) => void;
+    reset: (random?: boolean) => void;
+    regenerationInterval: number;
+  }) => {
+    return (
+      <>
         <Button aria-label="Reset" size="small" rounded onClick={() => reset()}>
           <Reset additonalStyles="h-5 w-5" />{" "}
         </Button>
-        <Button aria-label="Random" size="small" rounded onClick={() => reset(true)}>
+        <Button
+          aria-label="Random"
+          size="small"
+          rounded
+          onClick={() => reset(true)}
+        >
           <Dice additonalStyles="h-5 w-5" />
         </Button>
         <div>
@@ -267,63 +357,20 @@ export default function Home() {
             handleToggleClick={handleManualToggle}
           />
         </div>
-        
-          <select
-            aria-label="Frames per second"
-            value={regenerationInterval}
-            onChange={handleRegenerationIntervalChange}
-            className=" p-2 rounded-lg appearance-none"
-            disabled={isManual}
-          >
-            <option value={66}>15 fps</option>
-            <option value={100}>10 fps</option>
-            <option value={200}>5 fps</option>
-            <option value={1000}>1 fps</option>
-          </select>
-        
-      </div>
-    </div>
-  );
-}
 
-const PlayButton = React.memo(
-  ({
-    isPlaying,
-    playOrPause,
-    isManual,
-    generateNextFrame,
-  }: {
-    isPlaying: boolean;
-    isManual: boolean;
-    playOrPause: () => void;
-    generateNextFrame: () => void;
-  }) => {
-    const handleClick = () => {
-      if (isManual) {
-        generateNextFrame();
-      } else {
-        playOrPause();
-      }
-    };
-
-    const getButtonIcon = () => {
-      if (isManual) {
-        return { icon: <Next />, text: "Next frame" };
-      }
-
-      if (isPlaying) {
-        return { icon: <Pause />, text: "Pause" };
-      } else {
-        return { icon: <Play additonalStyles="ml-[2px] mr-[-2px]" />, text: "Play" };
-      }
-    };
-
-    const { icon, text } = getButtonIcon();
-
-    return (
-      <Button aria-label={text} rounded onClick={handleClick}>
-        {icon}
-      </Button>
+        <select
+          aria-label="Frames per second"
+          value={regenerationInterval}
+          onChange={handleRegenerationIntervalChange}
+          className=" p-2 rounded-lg appearance-none"
+          disabled={isManual}
+        >
+          <option value={66}>15 fps</option>
+          <option value={100}>10 fps</option>
+          <option value={200}>5 fps</option>
+          <option value={1000}>1 fps</option>
+        </select>
+      </>
     );
   }
 );
