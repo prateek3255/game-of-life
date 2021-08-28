@@ -1,6 +1,7 @@
 import "tailwindcss/tailwind.css";
 import Head from "next/head";
 import type { AppProps } from "next/app";
+import '@components/InfoModal/style.css'
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (

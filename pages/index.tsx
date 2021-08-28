@@ -1,8 +1,9 @@
 import React from "react";
 import debounce from "lodash/debounce";
-import { Play, Pause, Next, Reset, Dice } from "@components/Icons";
+import { Play, Pause, Next, Reset, Dice, Info } from "@components/Icons";
 import { Button } from "@components/Button";
 import { Toggle } from "@components/Toggle";
+import { InfoModal } from "@components/InfoModal";
 
 const getCellSize = () =>
   typeof window !== "undefined" && window.innerWidth >= 500 ? 24 : 20;
@@ -149,6 +150,29 @@ const areAllCellsDead = (cells: CellState["cells"]): boolean => {
 };
 
 export default function Home() {
+  const [isInfoModalOpen, setIsInfoModalOpen] = React.useState(false);
+
+  const handleModalToggle = () => {
+    setIsInfoModalOpen(!isInfoModalOpen);
+  };
+
+  return (
+    <div className="min-h-screen w-full flex flex-col items-center bg-gradient-to-b from-blue-50 to-blue-200 font-sans">
+      <div className="min-h-[80px] sm:min-h-[100px] text-center flex items-center">
+        <h1 className="font-sans font-black text-4xl sm:text-5xl text-blue-500 flex items-center">
+          Game of Life{" "}
+          <div role="button" onClick={handleModalToggle}>
+            <Info additonalStyles="sm:h-6 sm:w-6 h-5 w-5 sm:ml-4 ml-3 animate-pulse" />
+          </div>
+        </h1>
+      </div>
+      <InfoModal isOpen={isInfoModalOpen} closeModal={handleModalToggle} />
+      <GameBoard />
+    </div>
+  );
+}
+
+function GameBoard() {
   const [{ cells, count }, dispatch] = React.useReducer(reducer, {
     cells: [],
     count: 0,
@@ -229,12 +253,7 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center bg-gradient-to-b from-blue-50 to-blue-200 font-sans">
-      <div className="min-h-[80px] sm:min-h-[100px] text-center flex items-center">
-        <h1 className="font-sans font-black text-4xl sm:text-5xl text-blue-500">
-          Game of Life
-        </h1>
-      </div>
+    <>
       <div className="flex flex-col border-[1px] border-blue-200">
         {cells.map((row, i) => (
           <div key={i} className="flex flex-row">
@@ -273,7 +292,7 @@ export default function Home() {
           reset={reset}
         />
       </div>
-    </div>
+    </>
   );
 }
 
