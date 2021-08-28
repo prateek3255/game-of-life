@@ -63,14 +63,14 @@ const InfoModal = ({
           description="The 8 cells surrounding a cell are called its neighbours"
         />
       </div>
-      <p className="sm:text-base text-sm mt-8">
+      <div className="sm:text-base text-sm mt-8">
         Here are the rules for going from one generation to the next:
         <ol className="list-decimal px-6 mt-3">
           <li>
-            <p>
+            <div>
               A <b>dead cell</b> with exactly <b>three alive neighbors</b>{" "}
               becomes alive.
-            </p>
+            </div>
             <div
               className="mx-auto my-6 w-auto"
               style={{ width: "fit-content" }}
@@ -85,11 +85,11 @@ const InfoModal = ({
             </div>
           </li>
           <li>
-            <p>
+            <div>
               An <b>alive cell</b> with <b>zero or one neighbor dies</b> as if
               by underpopulation, and an alive cell with{" "}
               <b>four or more neighbors dies</b> as by overcrowding.
-            </p>
+            </div>
             <div className="flex sm:flex-row flex-col my-6 w-full justify-around sm:gap-0 gap-6">
               <Image
                 src="/underpopulation-die.png"
@@ -108,10 +108,10 @@ const InfoModal = ({
             </div>
           </li>
           <li>
-            <p>
+            <div>
               An <b>alive cell</b> with{" "}
               <b>two or three neighbors continues to live</b>.
-            </p>
+            </div>
             <div
               className="mx-auto my-6 w-auto"
               style={{ width: "fit-content" }}
@@ -125,7 +125,7 @@ const InfoModal = ({
             </div>
           </li>
         </ol>
-      </p>
+      </div>
     </ReactModal>
   );
 };

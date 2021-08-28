@@ -1,7 +1,12 @@
 import "tailwindcss/tailwind.css";
 import Head from "next/head";
+import ReactModal from "react-modal";
 import type { AppProps } from "next/app";
-import '@components/InfoModal/style.css'
+import '@components/InfoModal/style.css';
+
+if (typeof(window) !== 'undefined') {
+  ReactModal.setAppElement('body')
+}
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (

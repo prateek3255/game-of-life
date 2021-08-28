@@ -151,9 +151,18 @@ const areAllCellsDead = (cells: CellState["cells"]): boolean => {
 
 export default function Home() {
   const [isInfoModalOpen, setIsInfoModalOpen] = React.useState(false);
+  const [hasOpenedInfoModal, setHasOpenedInfoModal] = React.useState(false);
+
+  React.useEffect(()=>{
+    setHasOpenedInfoModal(localStorage.getItem("hasOpenedInfoModal") === "true");
+  },[])
 
   const handleModalToggle = () => {
     setIsInfoModalOpen(!isInfoModalOpen);
+    if (!hasOpenedInfoModal) {
+      setHasOpenedInfoModal(true);
+      localStorage.setItem("hasOpenedInfoModal", "true");
+    }
   };
 
   return (
@@ -162,7 +171,11 @@ export default function Home() {
         <h1 className="font-sans font-black text-4xl sm:text-5xl text-blue-500 flex items-center">
           Game of Life{" "}
           <div role="button" onClick={handleModalToggle}>
-            <Info additonalStyles="sm:h-6 sm:w-6 h-5 w-5 sm:ml-4 ml-3 animate-pulse" />
+            <Info
+              additonalStyles={`sm:h-6 sm:w-6 h-5 w-5 sm:ml-4 ml-3 ${
+                !hasOpenedInfoModal ? "animate-pulse" : ""
+              }`}
+            />
           </div>
         </h1>
       </div>
