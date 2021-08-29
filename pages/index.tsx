@@ -25,6 +25,7 @@ const Cell = React.memo(
     };
     return (
       <button
+        aria-label={`Cell ${row}-${col}`}
         onClick={onClick}
         style={{ height: getCellSize(), width: getCellSize() }}
         className={`border-[1px] border-blue-200 ${
@@ -172,7 +173,7 @@ export default function Home() {
       <div className="min-h-[80px] sm:min-h-[100px] text-center flex items-center">
         <h1 className="font-sans font-black text-4xl sm:text-5xl text-blue-500 flex items-center">
           Game of Life{" "}
-          <div role="button" onClick={handleModalToggle}>
+          <div role="button" aria-label="Learn more" onClick={handleModalToggle}>
             <Info
               additonalStyles={`sm:h-6 sm:w-6 h-5 w-5 sm:ml-4 ml-3 ${
                 !hasOpenedInfoModal ? "animate-pulse" : ""
@@ -388,6 +389,7 @@ const OtherControls = React.memo(
             active={!isManual}
             leftText="Manual"
             rightText="Automatic"
+            label="Manual-Automatic toggle"
             handleToggleClick={handleManualToggle}
           />
         </div>

@@ -27,15 +27,14 @@ const InfoModal = ({
         What is Game of Life?
       </h1>
       <p className="sm:mt-8 mt-6">
-        Game of Life is a cellular automaton invented by British
-        mathematician John Horton Conway in 1970. It consists of a 2-dimensional
-        grid of cells, each having an alive or dead (or on or off) state. An
-        initial state of the grid can be selected by assigning a state to each
-        cell, and with passing time, a new generation of cells is created based
-        on the state of the current cells their neighbouring cells based on some
-        dead simple rules. It is a zero-player game, which means that its
-        evolution is determined by just its initial state, requiring no further
-        input.
+        Game of Life is a cellular automaton invented by British mathematician
+        John Horton Conway in 1970. It consists of a 2-dimensional grid of
+        cells, each having an alive or dead (or on or off) state. An initial
+        state of the grid can be selected by assigning a state to each cell, and
+        with passing time, a new generation of cells is created based on the
+        state of the current cells their neighbouring cells based on some dead
+        simple rules. It is a zero-player game, which means that its evolution
+        is determined by just its initial state, requiring no further input.
       </p>
       <h2 className="sm:text-3xl text-xl font-bold sm:mt-12 mt-10">Rules</h2>
       <p className="mt-2">
@@ -258,8 +257,28 @@ const InfoModal = ({
         enjoy this as well ✌🏻.
       </p>
 
+      <p className="mt-6">
+        Made with{" "}
+        <a
+          href="https://tailwindcss.com/"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          Tailwind CSS
+        </a>
+        ,{" "}
+        <a
+          href="https://reactjs.org/"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          React
+        </a>{" "} and {" "}
+        💞 by <a href="https://prateeksurana.me">Prateek Surana</a>.
+      </p>
+
       <div className="mt-10 mx-auto w-full flex justify-center">
-        <Button onClick={closeModal}>Take me to the game!</Button>
+        <Button onClick={closeModal}>Back to the game!</Button>
       </div>
       <div></div>
     </ReactModal>
@@ -281,7 +300,12 @@ const ControlItem = ({
 }) => (
   <li className="flex sm:flex-row flex-col sm:gap-5 gap-2 items-center mt-6">
     <div className="min-w-[70px] max-w-[200px] flex justify-center items-center">
-      <Image src={`/game-of-life${image}`} alt={alt} width={width} height={height} />
+      <Image
+        src={`/game-of-life${image}`}
+        alt={alt}
+        width={width}
+        height={height}
+      />
     </div>
     <p>{children}</p>
   </li>
@@ -299,7 +323,12 @@ const TerminologyItem = ({
   description: string;
 }) => (
   <div className="flex flex-col justify-center items-center">
-    <Image src={`/game-of-life${image}`} height={size} width={size} alt={text} />
+    <Image
+      src={`/game-of-life${image}`}
+      height={size}
+      width={size}
+      alt={text}
+    />
     <div className="text-base font-bold mt-2">{text}</div>
     <p className="max-w-[190px] text-center mt-1">{description}</p>
   </div>
