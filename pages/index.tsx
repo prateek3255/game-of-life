@@ -153,9 +153,11 @@ export default function Home() {
   const [isInfoModalOpen, setIsInfoModalOpen] = React.useState(false);
   const [hasOpenedInfoModal, setHasOpenedInfoModal] = React.useState(false);
 
-  React.useEffect(()=>{
-    setHasOpenedInfoModal(localStorage.getItem("hasOpenedInfoModal") === "true");
-  },[])
+  React.useEffect(() => {
+    setHasOpenedInfoModal(
+      localStorage.getItem("hasOpenedInfoModal") === "true"
+    );
+  }, []);
 
   const handleModalToggle = () => {
     setIsInfoModalOpen(!isInfoModalOpen);

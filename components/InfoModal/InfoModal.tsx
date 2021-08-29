@@ -77,7 +77,7 @@ const InfoModal = ({
               style={{ width: "fit-content" }}
             >
               <Image
-                src="/dead-to-alive.png"
+                src="/game-of-life/dead-to-alive.png"
                 width="311"
                 height="100"
                 alt="A dead cell with exactly three alive neighbors becomes alive"
@@ -93,14 +93,14 @@ const InfoModal = ({
             </div>
             <div className="flex sm:flex-row flex-col my-6 w-full justify-around sm:gap-0 gap-6">
               <Image
-                src="/underpopulation-die.png"
+                src="/game-of-life/underpopulation-die.png"
                 width="311"
                 height="100"
                 alt="An alive cell with <b>zero or one neighbor dies"
                 className="mx-auto"
               />
               <Image
-                src="/overpopulation-die.png"
+                src="/game-of-life/overpopulation-die.png"
                 width="311"
                 height="100"
                 alt="An alive cell with four or more neighbors dies"
@@ -118,7 +118,7 @@ const InfoModal = ({
               style={{ width: "fit-content" }}
             >
               <Image
-                src="/stay-alive.png"
+                src="/game-of-life/stay-alive.png"
                 width="311"
                 height="100"
                 alt="An alive cell with two or three neighbors continues to live"
@@ -143,8 +143,8 @@ const InfoModal = ({
       </p>
       <div className="mt-6 w-full flex justify-center">
         <video controls autoPlay loop width="500">
-          <source src="/demo.webm" type="video/webm" />
-          <source src="/demo.mp4" type="video/mp4" />
+          <source src="/game-of-life/demo.webm" type="video/webm" />
+          <source src="/game-of-life/demo.mp4" type="video/mp4" />
           Sorry, your browser doesn't support embedded videos.
         </video>
       </div>
@@ -281,7 +281,7 @@ const ControlItem = ({
 }) => (
   <li className="flex sm:flex-row flex-col sm:gap-5 gap-2 items-center mt-6">
     <div className="min-w-[70px] max-w-[200px] flex justify-center items-center">
-      <Image src={image} alt={alt} width={width} height={height} />
+      <Image src={`/game-of-life${image}`} alt={alt} width={width} height={height} />
     </div>
     <p>{children}</p>
   </li>
@@ -299,7 +299,7 @@ const TerminologyItem = ({
   description: string;
 }) => (
   <div className="flex flex-col justify-center items-center">
-    <Image src={image} height={size} width={size} alt={text} />
+    <Image src={`/game-of-life${image}`} height={size} width={size} alt={text} />
     <div className="text-base font-bold mt-2">{text}</div>
     <p className="max-w-[190px] text-center mt-1">{description}</p>
   </div>
