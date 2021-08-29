@@ -397,10 +397,10 @@ const OtherControls = React.memo(
           className=" p-2 rounded-lg appearance-none"
           disabled={isManual}
         >
-          <option value={66}>15 fps</option>
-          <option value={100}>10 fps</option>
-          <option value={200}>5 fps</option>
-          <option value={1000}>1 fps</option>
+          <option value={66}>15 gps</option>
+          <option value={100}>10 gps</option>
+          <option value={200}>5 gps</option>
+          <option value={1000}>1 gps</option>
         </select>
       </>
     );
