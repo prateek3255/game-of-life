@@ -30,11 +30,11 @@ const InfoModal = ({
         Game of Life is a cellular automaton invented by British mathematician
         John Horton Conway in 1970. It consists of a 2-dimensional grid of
         cells, each having an alive or dead (or on or off) state. An initial
-        state of the grid can be selected by assigning a state to each cell, and
-        with passing time, a new generation of cells is created based on the
-        state of the current cells their neighbouring cells based on some dead
-        simple rules. It is a zero-player game, which means that its evolution
-        is determined by just its initial state, requiring no further input.
+        state of the grid can be selected by assigning a state to each cell. New
+        generations of cells can then be created based on the state of the
+        current cells and their neighbouring cells with some dead simple rules.
+        It is a zero-player game, which means that its evolution is determined
+        by just its initial state, requiring no further input.
       </p>
       <h2 className="sm:text-3xl text-xl font-bold sm:mt-12 mt-10">Rules</h2>
       <p className="mt-2">
@@ -86,9 +86,9 @@ const InfoModal = ({
           </li>
           <li>
             <div>
-              An <b>alive cell</b> with <b>zero or one neighbor dies</b> as if
-              by underpopulation, and an alive cell with{" "}
-              <b>four or more neighbors dies</b> as by overcrowding.
+              An <b>alive cell</b> with <b>zero or one alive neighbor dies</b>{" "}
+              as if by underpopulation, and an alive cell with{" "}
+              <b>four or more alive neighbors dies</b> as by overcrowding.
             </div>
             <div className="flex sm:flex-row flex-col my-6 w-full justify-around sm:gap-0 gap-6">
               <Image
@@ -110,7 +110,7 @@ const InfoModal = ({
           <li>
             <div>
               An <b>alive cell</b> with{" "}
-              <b>two or three neighbors continues to live</b>.
+              <b>two or three alive neighbors continues to live</b>.
             </div>
             <div
               className="mx-auto my-6 w-auto"
@@ -131,14 +131,18 @@ const InfoModal = ({
       </h2>
       <p className="mt-2">
         Now that you know the rules of the game, let's take a look at how the
-        board and the controls work. You can make any cell on the board alive or
-        dead by clicking on it, or you can click on the random button to
-        randomly make 30% of the cells alive. Once the initial state is ready
-        you can then click on the play button which generates a fixed number of
-        generations per second depending on the rate. Also the board wraps
-        around the edges, so the cells on the left edge have their neighbours on
-        the right edge and the cells on the top edge have their neighbours on
-        the bottom.
+        board and the controls work. You can{" "}
+        <b>make any cell on the board alive or dead by clicking on it</b>, or
+        you can click on the random button to randomly make 30% of the cells
+        alive. Once the initial state is ready you can then{" "}
+        <b>
+          click on the play button which generates a fixed number of generations
+          per second
+        </b>{" "}
+        depending on the generations per second rate, that you select from
+        dropdown (default is 10). Also <b>the board wraps around the edges</b>,
+        so the cells on the left edge have their neighbours on the right edge
+        and the cells on the top edge have their neighbours on the bottom.
       </p>
       <div className="mt-6 w-full flex justify-center">
         <video controls autoPlay loop width="500">
@@ -273,8 +277,8 @@ const InfoModal = ({
           rel="noreferrer noopener"
         >
           React
-        </a>{" "} and {" "}
-        💞 by <a href="https://prateeksurana.me">Prateek Surana</a>.
+        </a>{" "}
+        and 💞 by <a href="https://prateeksurana.me">Prateek Surana</a>.
       </p>
 
       <div className="mt-10 mx-auto w-full flex justify-center">
