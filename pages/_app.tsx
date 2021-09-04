@@ -104,11 +104,11 @@ function MyApp({ Component, pageProps }: AppProps) {
         />
 
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="http://prateeksurana.me/game-of-life" />
         <meta
-          property="og:title"
-          content="Game of Life"
+          property="og:url"
+          content="http://prateeksurana.me/game-of-life"
         />
+        <meta property="og:title" content="Game of Life" />
         <meta
           property="og:description"
           content="Play John Conway's Game of Life, learn how it works and what makes it so special"
@@ -119,11 +119,11 @@ function MyApp({ Component, pageProps }: AppProps) {
         />
 
         <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content="http://prateeksurana.me/game-of-life" />
         <meta
-          property="twitter:title"
-          content="Game of Life"
+          property="twitter:url"
+          content="http://prateeksurana.me/game-of-life"
         />
+        <meta property="twitter:title" content="Game of Life" />
         <meta
           property="twitter:description"
           content="Play John Conway's Game of Life, learn how it works and what makes it so special"
@@ -132,6 +132,23 @@ function MyApp({ Component, pageProps }: AppProps) {
           property="twitter:image"
           content="http://prateeksurana.me/game-of-life/og.png"
         />
+        {process.env.NODE_ENV === "development" && (
+          <>
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_ANALYTICS_ID}`}
+            />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', '${process.env.NEXT_PUBLIC_ANALYTICS_ID}');`,
+              }}
+            />
+          </>
+        )}
       </Head>
       <Component {...pageProps} />
     </>
