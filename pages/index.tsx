@@ -1,5 +1,6 @@
 import React from "react";
 import debounce from "lodash/debounce";
+import { useRouter } from "next/router";
 import { Play, Pause, Next, Reset, Dice, Info } from "@components/Icons";
 import { Button } from "@components/Button";
 import { Toggle } from "@components/Toggle";
@@ -73,7 +74,7 @@ function getAliveNeighbours(
   let sum = 0;
   for (let i = -1; i < 2; i++) {
     for (let j = -1; j < 2; j++) {
-      // Use the modulus operator to handles the
+      // Use the modulus operator to handle the
       // edge cases where cells are on the  edge
       // of the board, it will wrap the cell around
       // the board. Inspired by the coding train's solution
@@ -153,12 +154,19 @@ const areAllCellsDead = (cells: CellState["cells"]): boolean => {
 export default function Home() {
   const [isInfoModalOpen, setIsInfoModalOpen] = React.useState(false);
   const [hasOpenedInfoModal, setHasOpenedInfoModal] = React.useState(false);
+  const router = useRouter();
 
   React.useEffect(() => {
     setHasOpenedInfoModal(
       localStorage.getItem("hasOpenedInfoModal") === "true"
     );
   }, []);
+
+  React.useEffect(() => {
+    if (router.isReady && router.query.showInfo) {
+      handleModalToggle();
+    }
+  }, [router.isReady]);
 
   const handleModalToggle = () => {
     setIsInfoModalOpen(!isInfoModalOpen);
@@ -173,7 +181,11 @@ export default function Home() {
       <div className="min-h-[80px] sm:min-h-[100px] text-center flex items-center">
         <h1 className="font-sans font-black text-4xl sm:text-5xl text-blue-500 flex items-center">
           Game of Life{" "}
-          <div role="button" aria-label="Learn more" onClick={handleModalToggle}>
+          <div
+            role="button"
+            aria-label="Learn more"
+            onClick={handleModalToggle}
+          >
             <Info
               additonalStyles={`sm:h-6 sm:w-6 h-5 w-5 sm:ml-4 ml-3 ${
                 !hasOpenedInfoModal ? "animate-pulse" : ""
@@ -183,12 +195,12 @@ export default function Home() {
         </h1>
       </div>
       <InfoModal isOpen={isInfoModalOpen} closeModal={handleModalToggle} />
-      <GameBoard />
+      <GameBoard toggleInfoModal={handleModalToggle} />
     </div>
   );
 }
 
-function GameBoard() {
+function GameBoard({ toggleInfoModal }: { toggleInfoModal: () => void }) {
   const [{ cells, count }, dispatch] = React.useReducer(reducer, {
     cells: [],
     count: 0,
@@ -306,6 +318,7 @@ function GameBoard() {
           handleRegenerationIntervalChange={handleRegenerationIntervalChange}
           regenerationInterval={regenerationInterval}
           reset={reset}
+          handleInfoModalToggle={toggleInfoModal}
         />
       </div>
     </>
@@ -362,6 +375,7 @@ const OtherControls = React.memo(
     handleRegenerationIntervalChange,
     regenerationInterval,
     reset,
+    handleInfoModalToggle,
   }: {
     isManual: boolean;
     handleManualToggle: () => void;
@@ -370,6 +384,7 @@ const OtherControls = React.memo(
     ) => void;
     reset: (random?: boolean) => void;
     regenerationInterval: number;
+    handleInfoModalToggle: () => void;
   }) => {
     return (
       <>
@@ -406,6 +421,15 @@ const OtherControls = React.memo(
           <option value={200}>5 gps</option>
           <option value={1000}>1 gps</option>
         </select>
+
+        <Button
+          size="small"
+          aria-label="Learn more"
+          rounded
+          onClick={handleInfoModalToggle}
+        >
+          <Info additonalStyles="h-5 w-5" />
+        </Button>
       </>
     );
   }
