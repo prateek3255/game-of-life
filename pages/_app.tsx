@@ -132,7 +132,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           property="twitter:image"
           content="http://prateeksurana.me/game-of-life/og.png"
         />
-        {process.env.NODE_ENV === "development" && (
+        {process.env.NODE_ENV === "production" && (
           <>
             <script
               async
