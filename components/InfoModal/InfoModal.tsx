@@ -278,7 +278,23 @@ const InfoModal = ({
         >
           React
         </a>{" "}
-        and 💞 by <a href="https://prateeksurana.me">Prateek Surana</a>.
+        and 💞 by{" "}
+        <a
+          href="https://prateeksurana.me"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          Prateek Surana
+        </a>
+        . Check it out the code on{" "}
+        <a
+          href="https://github.com/prateek3255/game-of-life"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          GitHub
+        </a>
+        .
       </p>
 
       <div className="mt-10 mx-auto w-full flex justify-center">
