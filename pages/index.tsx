@@ -1,6 +1,8 @@
 import React from "react";
 import debounce from "lodash/debounce";
 import { useRouter } from "next/router";
+import { current } from "immer";
+import { useImmerReducer } from "use-immer";
 import { Play, Pause, Next, Reset, Dice, Info } from "@components/Icons";
 import { Button } from "@components/Button";
 import { Toggle } from "@components/Toggle";
@@ -36,120 +38,6 @@ const Cell = React.memo(
     );
   }
 );
-
-type CellState = { cells: number[][]; count: number };
-
-type Action =
-  | { type: "initialize"; random?: boolean }
-  | { type: "cell_clicked"; row: number; col: number }
-  | { type: "generate_next_state" };
-
-function generateBoard(random?: boolean): CellState {
-  const rows = Math.floor(
-    Math.min(window.innerHeight - 250, 1200) / getCellSize()
-  );
-  const columns = Math.floor(Math.min(window.innerWidth, 1200) / getCellSize());
-  const state = new Array(rows).fill(0).map((i) => new Array(columns).fill(0));
-
-  if (random) {
-    // Create a random board where each cell has
-    // a 30% chance of being alive
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < columns; col++) {
-        state[row][col] = Math.random() < 0.7 ? 0 : 1;
-      }
-    }
-  }
-
-  return { cells: state, count: 0 };
-}
-
-function getAliveNeighbours(
-  state: CellState["cells"],
-  x: number,
-  y: number,
-  rows: number,
-  cols: number
-): number {
-  let sum = 0;
-  for (let i = -1; i < 2; i++) {
-    for (let j = -1; j < 2; j++) {
-      // Use the modulus operator to handle the
-      // edge cases where cells are on the  edge
-      // of the board, it will wrap the cell around
-      // the board. Inspired by the coding train's solution
-      // https://www.youtube.com/watch?v=FWSR_7kZuYg
-      const xPos = (x + i + rows) % rows;
-      const yPos = (y + j + cols) % cols;
-      sum += state[xPos][yPos];
-    }
-  }
-
-  sum = sum - state[x][y];
-
-  return sum;
-}
-
-function reducer(state: CellState, action: Action): CellState {
-  switch (action.type) {
-    case "initialize":
-      return generateBoard(action.random);
-    case "cell_clicked": {
-      const { cells } = state;
-      const newCellState = cells[action.row][action.col] === 0 ? 1 : 0;
-      const updatedState = [
-        ...cells.slice(0, action.row),
-        [
-          ...cells[action.row].slice(0, action.col),
-          newCellState,
-          ...cells[action.row].slice(action.col + 1),
-        ],
-        ...cells.slice(action.row + 1),
-      ];
-      return { ...state, cells: updatedState };
-    }
-    case "generate_next_state": {
-      const nextState = generateBoard();
-      const { cells, count } = state;
-      const totalRows = cells.length;
-      const totalCols = cells[0].length;
-      // Using for loop here for simplicity and readability
-      // can change later if a more readable way is found
-      for (let i = 0; i < totalRows; i++) {
-        for (let j = 0; j < totalCols; j++) {
-          const cellState = cells[i][j];
-          const aliveNeighbours = getAliveNeighbours(
-            cells,
-            i,
-            j,
-            totalRows,
-            totalCols
-          );
-
-          if (cellState === 0 && aliveNeighbours === 3) {
-            nextState.cells[i][j] = 1;
-          } else if (
-            cellState === 1 &&
-            (aliveNeighbours < 2 || aliveNeighbours > 3)
-          ) {
-            nextState.cells[i][j] = 0;
-          } else {
-            nextState.cells[i][j] = cellState;
-          }
-        }
-      }
-
-      nextState.count = count + 1;
-      return nextState;
-    }
-    default:
-      return state;
-  }
-}
-
-const areAllCellsDead = (cells: CellState["cells"]): boolean => {
-  return cells.every((row) => row.every((cell) => cell === 0));
-};
 
 export default function Home() {
   const [isInfoModalOpen, setIsInfoModalOpen] = React.useState(false);
@@ -200,11 +88,120 @@ export default function Home() {
   );
 }
 
+type CellState = { cells: number[][]; count: number };
+
+type Action =
+  | { type: "initialize"; random?: boolean }
+  | { type: "cell_clicked"; row: number; col: number }
+  | { type: "generate_next_state" };
+
+function getAliveNeighbours(
+  state: CellState["cells"],
+  x: number,
+  y: number,
+  rows: number,
+  cols: number
+): number {
+  let sum = 0;
+  for (let i = -1; i < 2; i++) {
+    for (let j = -1; j < 2; j++) {
+      // Use the modulus operator to handle the
+      // edge cases where cells are on the  edge
+      // of the board, it will wrap the cell around
+      // the board. Inspired by the coding train's solution
+      // https://www.youtube.com/watch?v=FWSR_7kZuYg
+      const xPos = (x + i + rows) % rows;
+      const yPos = (y + j + cols) % cols;
+      sum += state[xPos][yPos];
+    }
+  }
+
+  sum = sum - state[x][y];
+
+  return sum;
+}
+
+const reducer = (draft: CellState, action: Action) => {
+  switch (action.type) {
+    case "initialize": {
+      const rows = Math.floor(
+        Math.min(window.innerHeight - 250, 1200) / getCellSize()
+      );
+      const columns = Math.floor(
+        Math.min(window.innerWidth, 1200) / getCellSize()
+      );
+      draft.cells = new Array(rows)
+        .fill(0)
+        .map(() => new Array(columns).fill(0));
+
+      if (action.random) {
+        // Create a random board where each cell has
+        // a 30% chance of being alive
+        for (let row = 0; row < rows; row++) {
+          for (let col = 0; col < columns; col++) {
+            draft.cells[row][col] = Math.random() < 0.7 ? 0 : 1;
+          }
+        }
+      }
+
+      draft.count = 0;
+      break;
+    }
+    case "cell_clicked": {
+      const newCellState = draft.cells[action.row][action.col] === 0 ? 1 : 0;
+      draft.cells[action.row][action.col] = newCellState;
+      break;
+    }
+    case "generate_next_state": {
+      const prevState = current(draft);
+      const totalRows = draft.cells.length;
+      const totalCols = draft.cells[0].length;
+      // Using for loop here for simplicity and readability
+      // can change later if a more readable way is found
+      for (let i = 0; i < totalRows; i++) {
+        for (let j = 0; j < totalCols; j++) {
+          const cellState = prevState.cells[i][j];
+          const aliveNeighbours = getAliveNeighbours(
+            prevState.cells,
+            i,
+            j,
+            totalRows,
+            totalCols
+          );
+
+          if (cellState === 0 && aliveNeighbours === 3) {
+            draft.cells[i][j] = 1;
+          } else if (
+            cellState === 1 &&
+            (aliveNeighbours < 2 || aliveNeighbours > 3)
+          ) {
+            draft.cells[i][j] = 0;
+          } else {
+            draft.cells[i][j] = cellState;
+          }
+        }
+      }
+
+      draft.count = prevState.count + 1;
+      break;
+    }
+    default:
+      break;
+  }
+};
+
+const areAllCellsDead = (cells: CellState["cells"]): boolean => {
+  return cells.every((row) => row.every((cell) => cell === 0));
+};
+
 function GameBoard({ toggleInfoModal }: { toggleInfoModal: () => void }) {
-  const [{ cells, count }, dispatch] = React.useReducer(reducer, {
-    cells: [],
-    count: 0,
-  });
+  const [{ cells, count }, dispatch] = useImmerReducer<CellState, Action>(
+    reducer,
+    {
+      cells: [],
+      count: 0,
+    }
+  );
   const [isMounted, setIsMounted] = React.useState(false);
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [isManual, setIsManual] = React.useState(false);
