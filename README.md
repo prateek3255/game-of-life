@@ -4,7 +4,9 @@ Game of Life is a cellular automaton invented by British mathematician John Hort
 
 This project is an interactive implementation of the Game of Life, that allows you to play with it and explore what makes it so special.
 
-https://prateeksurana.me/game-of-life/demo.mp4
+
+https://user-images.githubusercontent.com/21277179/136671338-c6eefb98-8ee7-41b0-a3f8-0f6f50958e99.mp4
+
 
 
 Check out the live demo and detailed explanation of how it works here - [https://prateeksurana.me/game-of-life](https://prateeksurana.me/game-of-life?showInfo=true).
