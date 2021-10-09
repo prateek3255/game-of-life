@@ -7,7 +7,7 @@ import { Toggle } from "@components/Toggle";
 import { InfoModal } from "@components/InfoModal";
 
 const getCellSize = () =>
-  typeof window !== "undefined" && window.innerWidth >= 500 ? 24 : 20;
+  typeof window !== "undefined" && window.innerWidth >= 500 ? 24 : 40;
 
 const Cell = React.memo(
   ({
@@ -279,6 +279,14 @@ function GameBoard({ toggleInfoModal }: { toggleInfoModal: () => void }) {
     },
     [isPlaying, generateNextFrame, clearCurrentInterval]
   );
+
+  if (!isMounted || cells.length === 0) {
+    return (
+      <div className=" absolute top-[48%] left-1/2">
+        <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-300 h-16 w-16 mb-4"></div>
+      </div>
+    );
+  }
 
   return (
     <>
